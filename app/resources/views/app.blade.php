@@ -15,7 +15,8 @@
 
         <!-- PWA -->
         <link rel="manifest" href="/manifest.json">
-        <link rel="apple-touch-icon" href="/icons/icon-192.png">
+        <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+        <meta name="apple-mobile-web-app-title" content="Mój Budżet">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">

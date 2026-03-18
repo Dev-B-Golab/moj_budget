@@ -25,7 +25,7 @@ const submit = () => {
     <GuestLayout>
         <Head title="Zapomniałeś hasła" />
 
-        <div class="mb-4 text-sm text-gray-600">
+        <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
             Zapomniałeś hasła? Żaden problem. Podaj swój adres email,
             a wyślemy Ci link do zresetowania hasła, dzięki któremu
             będziesz mógł ustawić nowe.

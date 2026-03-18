@@ -72,17 +72,17 @@ const submit = () => {
             <div class="mt-4 block">
                 <label class="flex items-center">
                     <Checkbox name="remember" v-model:checked="form.remember" />
-                    <span class="ms-2 text-sm text-gray-600"
+                    <span class="ms-2 text-sm text-gray-600 dark:text-gray-400"
                         >Zapamiętaj mnie</span
                     >
                 </label>
             </div>
 
-            <div class="mt-4 flex items-center justify-end">
+            <div class="mt-4 flex items-center justify-between">
                 <Link
                     v-if="canResetPassword"
                     :href="route('password.request')"
-                    class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    class="rounded-md text-sm text-gray-600 dark:text-gray-400 underline hover:text-gray-900 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
                 >
                     Zapomniałeś hasła?
                 </Link>
@@ -94,6 +94,15 @@ const submit = () => {
                 >
                     Zaloguj się
                 </PrimaryButton>
+            </div>
+
+            <div class="mt-6 text-center border-t border-gray-200 dark:border-gray-700 pt-4">
+                <Link
+                    :href="route('register')"
+                    class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium"
+                >
+                    Nie masz konta? Zarejestruj się
+                </Link>
             </div>
         </form>
     </GuestLayout>

@@ -1,6 +1,6 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import WalletScene from '@/Components/WalletScene.vue';
 
 const demoForm = useForm({});
@@ -14,11 +14,50 @@ defineProps({
 });
 
 const isDark = ref(false);
+const deferredPrompt = ref(null);
+const showInstallButton = ref(false);
+const showIOSInstructions = ref(false);
+
+const isIOS = computed(() => {
+    if (typeof navigator === 'undefined') return false;
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.userAgent.includes('Mac') && 'ontouchend' in document);
+});
+
+const isStandalone = computed(() => {
+    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+});
 
 onMounted(() => {
     isDark.value = localStorage.getItem('theme') === 'dark';
     document.documentElement.classList.toggle('dark', isDark.value);
+
+    // PWA install prompt (Android/Chrome)
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt.value = e;
+        showInstallButton.value = true;
+    });
+
+    // Show install option for iOS if not already installed
+    if (isIOS.value && !isStandalone.value) {
+        showInstallButton.value = true;
+    }
 });
+
+async function installPWA() {
+    if (isIOS.value) {
+        showIOSInstructions.value = true;
+        return;
+    }
+    if (deferredPrompt.value) {
+        deferredPrompt.value.prompt();
+        const { outcome } = await deferredPrompt.value.userChoice;
+        if (outcome === 'accepted') {
+            showInstallButton.value = false;
+        }
+        deferredPrompt.value = null;
+    }
+}
 
 function toggleTheme() {
     isDark.value = !isDark.value;
@@ -96,6 +135,12 @@ const features = [
                             🚀 Wypróbuj demo
                         </button>
                     </div>
+
+                    <!-- PWA Install Button -->
+                    <button v-if="showInstallButton && !isStandalone" @click="installPWA" class="mt-4 inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 border border-indigo-200 dark:border-indigo-700 rounded-xl transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        Zainstaluj aplikację
+                    </button>
                 </div>
 
                 <!-- 3D Wallet Scene -->
@@ -179,5 +224,36 @@ const features = [
                 <p class="text-sm text-gray-400">© {{ new Date().getFullYear() }} Mój Budżet. Wszystkie prawa zastrzeżone.</p>
             </div>
         </footer>
+
+        <!-- iOS PWA Install Instructions Modal -->
+        <Teleport to="body">
+            <div v-if="showIOSInstructions" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
+                <div class="fixed inset-0 bg-black/50" @click="showIOSInstructions = false"></div>
+                <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 max-w-sm w-full">
+                    <button @click="showIOSInstructions = false" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                    <div class="text-center">
+                        <div class="text-4xl mb-3">📲</div>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Zainstaluj na iPhone</h3>
+                        <div class="space-y-4 text-left">
+                            <div class="flex items-start gap-3">
+                                <span class="flex-shrink-0 w-7 h-7 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center text-sm font-bold">1</span>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 pt-0.5">Kliknij ikonę <strong class="text-gray-900 dark:text-white">Udostępnij</strong> <svg class="inline w-5 h-5 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg> na dole przeglądarki Safari</p>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="flex-shrink-0 w-7 h-7 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center text-sm font-bold">2</span>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 pt-0.5">Przewiń w dół i wybierz <strong class="text-gray-900 dark:text-white">"Dodaj do ekranu początkowego"</strong></p>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="flex-shrink-0 w-7 h-7 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center text-sm font-bold">3</span>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 pt-0.5">Kliknij <strong class="text-gray-900 dark:text-white">"Dodaj"</strong> — gotowe!</p>
+                            </div>
+                        </div>
+                        <button @click="showIOSInstructions = false" class="mt-6 w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition">Rozumiem</button>
+                    </div>
+                </div>
+            </div>
+        </Teleport>
     </div>
 </template>
