@@ -43,7 +43,18 @@
         @inertia
         <script>
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/sw.js');
+                navigator.serviceWorker.register('/sw.js').then(function(reg) {
+                    // Check for updates every 60s
+                    setInterval(function() { reg.update(); }, 60000);
+                    // Auto-reload when new SW activates
+                    var refreshing = false;
+                    navigator.serviceWorker.addEventListener('controllerchange', function() {
+                        if (!refreshing) {
+                            refreshing = true;
+                            window.location.reload();
+                        }
+                    });
+                });
             }
         </script>
     </body>

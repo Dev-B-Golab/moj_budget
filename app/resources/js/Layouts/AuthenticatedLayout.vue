@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
@@ -17,6 +17,12 @@ const showFlash = ref(false);
 const page = usePage();
 const isDemo = computed(() => page.props.isDemo);
 
+// Hide FAB on pages that have form submit buttons at the bottom
+const showFab = computed(() => {
+    const r = route();
+    return !r.current('*.create') && !r.current('*.edit') && !r.current('transfer.*') && !r.current('profile.*');
+});
+
 watch(() => page.props.flash?.error, (msg) => {
     if (msg) {
         flashMessage.value = msg;
@@ -25,9 +31,19 @@ watch(() => page.props.flash?.error, (msg) => {
     }
 });
 
+// Force data reload on browser back/forward to avoid stale cache
+const onPopState = () => {
+    router.reload();
+};
+
 onMounted(() => {
     isDark.value = localStorage.getItem('theme') === 'dark';
     applyTheme();
+    window.addEventListener('popstate', onPopState);
+});
+
+onUnmounted(() => {
+    window.removeEventListener('popstate', onPopState);
 });
 
 function toggleTheme() {
@@ -124,29 +140,61 @@ function applyTheme() {
                         </div>
                     </div>
                 </div>
-
-                <div :class="{ block: showingNavigationDropdown, hidden: !showingNavigationDropdown }" class="sm:hidden">
-                    <div class="space-y-1 pb-3 pt-2">
-                        <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">Panel</ResponsiveNavLink>
-                        <ResponsiveNavLink :href="route('transactions.index')" :active="route().current('transactions.*')">Transakcje</ResponsiveNavLink>
-                        <ResponsiveNavLink :href="route('categories.index')" :active="route().current('categories.*')">Kategorie</ResponsiveNavLink>
-                        <ResponsiveNavLink :href="route('recurring.index')" :active="route().current('recurring.*')">Cykliczne</ResponsiveNavLink>
-                        <ResponsiveNavLink :href="route('transfer.create')" :active="route().current('transfer.*')">Transfer</ResponsiveNavLink>
-                        <ResponsiveNavLink :href="route('statistics.index')" :active="route().current('statistics.*')">Statystyki</ResponsiveNavLink>
-                    </div>
-
-                    <div class="border-t border-gray-200 dark:border-gray-600 pb-1 pt-4">
-                        <div class="px-4">
-                            <div class="text-base font-medium text-gray-800 dark:text-gray-200">{{ $page.props.auth.user.name }}</div>
-                            <div class="text-sm font-medium text-gray-500">{{ $page.props.auth.user.email }}</div>
-                        </div>
-                        <div class="mt-3 space-y-1">
-                            <ResponsiveNavLink :href="route('profile.edit')">Profil</ResponsiveNavLink>
-                            <ResponsiveNavLink :href="route('logout')" method="post" as="button">Wyloguj</ResponsiveNavLink>
-                        </div>
-                    </div>
-                </div>
             </nav>
+
+            <!-- Mobile menu overlay — completely outside nav, fixed above everything -->
+            <Teleport to="body">
+                <transition
+                    enter-active-class="transition duration-200 ease-out"
+                    enter-from-class="opacity-0"
+                    enter-to-class="opacity-100"
+                    leave-active-class="transition duration-150 ease-in"
+                    leave-from-class="opacity-100"
+                    leave-to-class="opacity-0"
+                >
+                    <div v-if="showingNavigationDropdown" class="fixed inset-0 z-50 sm:hidden">
+                        <!-- Backdrop -->
+                        <div class="absolute inset-0 bg-black/40" @click="showingNavigationDropdown = false"></div>
+
+                        <!-- Menu panel sliding from top -->
+                        <div class="absolute top-0 left-0 right-0 bg-white dark:bg-gray-800 shadow-2xl rounded-b-2xl overflow-hidden">
+                            <!-- Header with close button -->
+                            <div class="flex items-center justify-between px-4 h-16 border-b border-gray-100 dark:border-gray-700">
+                                <Link :href="route('dashboard')" @click="showingNavigationDropdown = false">
+                                    <ApplicationLogo class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
+                                </Link>
+                                <button @click="showingNavigationDropdown = false" class="p-2 rounded-lg text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- Nav links -->
+                            <div class="space-y-1 py-3">
+                                <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')" @click="showingNavigationDropdown = false">Panel</ResponsiveNavLink>
+                                <ResponsiveNavLink :href="route('transactions.index')" :active="route().current('transactions.*')" @click="showingNavigationDropdown = false">Transakcje</ResponsiveNavLink>
+                                <ResponsiveNavLink :href="route('categories.index')" :active="route().current('categories.*')" @click="showingNavigationDropdown = false">Kategorie</ResponsiveNavLink>
+                                <ResponsiveNavLink :href="route('recurring.index')" :active="route().current('recurring.*')" @click="showingNavigationDropdown = false">Cykliczne</ResponsiveNavLink>
+                                <ResponsiveNavLink :href="route('transfer.create')" :active="route().current('transfer.*')" @click="showingNavigationDropdown = false">Transfer</ResponsiveNavLink>
+                                <ResponsiveNavLink :href="route('statistics.index')" :active="route().current('statistics.*')" @click="showingNavigationDropdown = false">Statystyki</ResponsiveNavLink>
+                            </div>
+
+                            <!-- User section -->
+                            <div class="border-t border-gray-200 dark:border-gray-600 py-4">
+                                <div class="px-4 mb-3">
+                                    <div class="text-base font-medium text-gray-800 dark:text-gray-200">{{ $page.props.auth.user.name }}</div>
+                                    <div class="text-sm font-medium text-gray-500">{{ $page.props.auth.user.email }}</div>
+                                </div>
+                                <div class="space-y-1">
+                                    <ResponsiveNavLink :href="route('profile.edit')" @click="showingNavigationDropdown = false">Profil</ResponsiveNavLink>
+                                    <ResponsiveNavLink :href="route('logout')" method="post" as="button">Wyloguj</ResponsiveNavLink>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </transition>
+            </Teleport>
 
             <header class="bg-white dark:bg-gray-800 shadow-sm" v-if="$slots.header">
                 <div class="mx-auto max-w-7xl px-4 py-4 sm:py-6 sm:px-6 lg:px-8">
@@ -172,7 +220,7 @@ function applyTheme() {
             </transition>
 
             <!-- Mobile FAB -->
-            <div class="sm:hidden fixed bottom-6 right-6 z-50">
+            <div v-if="showFab" class="sm:hidden fixed bottom-6 right-6 z-50">
                 <!-- Backdrop -->
                 <div v-if="fabOpen" class="fixed inset-0 bg-black/20 dark:bg-black/40" @click="fabOpen = false"></div>
 
