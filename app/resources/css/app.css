@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global mobile overflow prevention */
+html, body {
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Smoother scrolling on iOS */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Better input styling on mobile */
+@media (max-width: 640px) {
+    input, select, textarea, button {
+        font-size: 16px !important;
+    }
+}
