@@ -21,7 +21,7 @@ const submit = () => {
     <GuestLayout>
         <Head title="Potwierdzenie hasła" />
 
-        <div class="mb-4 text-sm text-gray-600">
+        <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
             To jest zabezpieczona strefa aplikacji. Potwierdź swoje
             hasło, aby kontynuować.
         </div>

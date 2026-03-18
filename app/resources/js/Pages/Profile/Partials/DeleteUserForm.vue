@@ -41,11 +41,11 @@ const closeModal = () => {
 <template>
     <section class="space-y-6">
         <header>
-            <h2 class="text-lg font-medium text-gray-900">
+            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                 Usuń konto
             </h2>
 
-            <p class="mt-1 text-sm text-gray-600">
+            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
                 Po usunięciu konta wszystkie jego dane zostaną
                 trwale usunięte. Przed usunięciem konta pobierz
                 wszelkie dane, które chcesz zachować.
@@ -57,12 +57,12 @@ const closeModal = () => {
         <Modal :show="confirmingUserDeletion" @close="closeModal">
             <div class="p-6">
                 <h2
-                    class="text-lg font-medium text-gray-900"
+                    class="text-lg font-medium text-gray-900 dark:text-gray-100"
                 >
                     Czy na pewno chcesz usunąć swoje konto?
                 </h2>
 
-                <p class="mt-1 text-sm text-gray-600">
+                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
                     Po usunięciu konta wszystkie jego dane zostaną
                     trwale usunięte. Wprowadź swoje hasło, aby
                     potwierdzić trwałe usunięcie konta.

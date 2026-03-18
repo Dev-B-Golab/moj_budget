@@ -1,7 +1,7 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ref, onMounted, computed } from 'vue';
-import WalletScene from '@/Components/WalletScene.vue';
+import { ref, onMounted, computed, defineAsyncComponent } from 'vue';
+const WalletScene = defineAsyncComponent(() => import('@/Components/WalletScene.vue'));
 
 const demoForm = useForm({});
 const loginAsDemo = () => {
@@ -151,7 +151,16 @@ const features = [
                     <div class="absolute top-10 left-10 w-3 h-3 bg-yellow-400 rounded-full opacity-60 animate-bounce" style="animation-delay: 0s; animation-duration: 2.5s;"></div>
                     <div class="absolute top-20 right-20 w-2 h-2 bg-indigo-400 rounded-full opacity-50 animate-bounce" style="animation-delay: 0.5s; animation-duration: 3s;"></div>
                     <div class="absolute bottom-20 left-20 w-2 h-2 bg-violet-400 rounded-full opacity-40 animate-bounce" style="animation-delay: 1s; animation-duration: 2.8s;"></div>
-                    <WalletScene class="relative z-10" />
+                    <Suspense>
+                        <WalletScene class="relative z-10" />
+                        <template #fallback>
+                            <div class="relative z-10 flex items-center justify-center h-full">
+                                <div class="coin-loader">
+                                    <div class="coin-loader__coin"></div>
+                                </div>
+                            </div>
+                        </template>
+                    </Suspense>
                 </div>
             </div>
         </section>
@@ -257,3 +266,52 @@ const features = [
         </Teleport>
     </div>
 </template>
+
+<style scoped>
+.coin-loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.coin-loader__coin {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #fde68a 0%, #fbbf24 40%, #d97706 100%);
+    box-shadow:
+        inset 0 -4px 8px rgba(120, 53, 15, 0.3),
+        inset 0 4px 8px rgba(253, 230, 138, 0.4),
+        0 8px 32px rgba(251, 191, 36, 0.3);
+    position: relative;
+    animation: coinSpin 1.2s ease-in-out infinite;
+}
+
+.coin-loader__coin::before {
+    content: '$';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #78350f;
+    opacity: 0.8;
+}
+
+.coin-loader__coin::after {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border-radius: 50%;
+    border: 2px solid rgba(120, 53, 15, 0.2);
+}
+
+@keyframes coinSpin {
+    0% { transform: rotateY(0deg) scale(1); }
+    50% { transform: rotateY(180deg) scale(0.85); }
+    100% { transform: rotateY(360deg) scale(1); }
+}
+</style>

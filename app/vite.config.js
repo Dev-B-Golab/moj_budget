@@ -17,4 +17,14 @@ export default defineConfig({
             },
         }),
     ],
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    three: ['three'],
+                    chartjs: ['chart.js', 'vue-chartjs'],
+                },
+            },
+        },
+    },
 });
