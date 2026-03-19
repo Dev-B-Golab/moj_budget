@@ -95,7 +95,7 @@ function submit() {
                         <!-- Day of month -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dzień miesiąca</label>
-                            <select v-model="form.day_of_month" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
+                            <select v-model="form.day_of_month" class="w-full rounded-md border-gray-300 text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
                                 <option v-for="d in 28" :key="d" :value="d">{{ d }}.</option>
                             </select>
                             <p class="text-xs text-gray-400 mt-1">Maksymalnie 28 — aby transakcja generowała się co miesiąc</p>

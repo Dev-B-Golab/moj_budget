@@ -17,10 +17,10 @@ const showFlash = ref(false);
 const page = usePage();
 const isDemo = computed(() => page.props.isDemo);
 
-// Hide FAB on pages that have form submit buttons at the bottom
+// Show FAB only on dashboard
 const showFab = computed(() => {
     const r = route();
-    return !r.current('*.create') && !r.current('*.edit') && !r.current('transfer.*') && !r.current('profile.*');
+    return r.current('dashboard');
 });
 
 watch(() => page.props.flash?.error, (msg) => {
@@ -36,14 +36,63 @@ const onPopState = () => {
     router.reload();
 };
 
+// Swipe navigation for mobile PWA
+const navPages = [
+    { pattern: 'dashboard', route: 'dashboard' },
+    { pattern: 'transactions.*', route: 'transactions.index' },
+    { pattern: 'categories.*', route: 'categories.index' },
+    { pattern: 'recurring.*', route: 'recurring.index' },
+    { pattern: 'transfer.*', route: 'transfer.create' },
+    { pattern: 'statistics.*', route: 'statistics.index' },
+];
+
+let touchStartX = 0;
+let touchStartY = 0;
+let touchStartTime = 0;
+
+function onTouchStart(e) {
+    if (window.innerWidth >= 640) return; // only mobile
+    const touch = e.touches[0];
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+    touchStartTime = Date.now();
+}
+
+function onTouchEnd(e) {
+    if (window.innerWidth >= 640) return;
+    const touch = e.changedTouches[0];
+    const deltaX = touch.clientX - touchStartX;
+    const deltaY = touch.clientY - touchStartY;
+    const elapsed = Date.now() - touchStartTime;
+
+    // Must be a quick swipe (< 400ms), mostly horizontal, at least 80px
+    if (elapsed > 400 || Math.abs(deltaX) < 80 || Math.abs(deltaY) > Math.abs(deltaX) * 0.6) return;
+
+    const r = route();
+    const currentIndex = navPages.findIndex(p => r.current(p.pattern));
+    if (currentIndex === -1) return;
+
+    if (deltaX < 0 && currentIndex < navPages.length - 1) {
+        // Swipe left → next page
+        router.visit(route(navPages[currentIndex + 1].route));
+    } else if (deltaX > 0 && currentIndex > 0) {
+        // Swipe right → previous page
+        router.visit(route(navPages[currentIndex - 1].route));
+    }
+}
+
 onMounted(() => {
     isDark.value = localStorage.getItem('theme') === 'dark';
     applyTheme();
     window.addEventListener('popstate', onPopState);
+    document.addEventListener('touchstart', onTouchStart, { passive: true });
+    document.addEventListener('touchend', onTouchEnd, { passive: true });
 });
 
 onUnmounted(() => {
     window.removeEventListener('popstate', onPopState);
+    document.removeEventListener('touchstart', onTouchStart);
+    document.removeEventListener('touchend', onTouchEnd);
 });
 
 function toggleTheme() {

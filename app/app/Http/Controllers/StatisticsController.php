@@ -14,8 +14,10 @@ class StatisticsController extends Controller
         $user = $request->user();
         $validated = $request->validate([
             'year' => ['nullable', 'integer', 'min:2000', 'max:2100'],
+            'month' => ['nullable', 'integer', 'min:1', 'max:12'],
         ]);
         $year = $validated['year'] ?? Carbon::now()->year;
+        $month = $validated['month'] ?? Carbon::now()->month;
 
         $monthlyData = Transaction::where('user_id', $user->id)
             ->whereYear('date', $year)
@@ -76,6 +78,30 @@ class StatisticsController extends Controller
             $availableYears = collect([Carbon::now()->year]);
         }
 
+        // Daily breakdown for selected month
+        $dailyData = Transaction::where('transactions.user_id', $user->id)
+            ->whereYear('transactions.date', $year)
+            ->whereMonth('transactions.date', $month)
+            ->join('categories', 'transactions.category_id', '=', 'categories.id')
+            ->select('categories.name as category_name', 'categories.icon as category_icon', 'categories.color as category_color')
+            ->selectRaw('DAY(transactions.date) as day, transactions.type, SUM(transactions.amount) as total')
+            ->groupByRaw('DAY(transactions.date), transactions.type, categories.id, categories.name, categories.icon, categories.color')
+            ->orderByRaw('DAY(transactions.date)')
+            ->get();
+
+        // Daily totals (sum per day)
+        $dailyTotals = Transaction::where('user_id', $user->id)
+            ->whereYear('date', $year)
+            ->whereMonth('date', $month)
+            ->selectRaw("
+                DAY(date) as day,
+                SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as income,
+                SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as expenses
+            ")
+            ->groupByRaw('DAY(date)')
+            ->orderByRaw('DAY(date)')
+            ->get();
+
         return Inertia::render('Statistics/Index', [
             'monthlyData' => $monthlyData,
             'expensesByCategory' => $expensesByCategory,
@@ -87,7 +113,10 @@ class StatisticsController extends Controller
                 'balance' => (float) (($yearTotal->total_income ?? 0) - ($yearTotal->total_expenses ?? 0)),
             ],
             'selectedYear' => (int) $year,
+            'selectedMonth' => (int) $month,
             'availableYears' => $availableYears,
+            'dailyData' => $dailyData,
+            'dailyTotals' => $dailyTotals,
         ]);
     }
 }

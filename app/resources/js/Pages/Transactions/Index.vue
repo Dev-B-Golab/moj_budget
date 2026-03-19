@@ -61,23 +61,23 @@ watch(() => filters.value.search, () => {
                 <!-- Filters -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 sm:p-4">
                     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
-                        <input v-model="filters.search" type="text" placeholder="Szukaj..." class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 text-sm col-span-2 sm:col-span-1" />
-                        <select v-model="filters.type" @change="applyFilters" class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 text-sm">
+                        <input v-model="filters.search" type="text" placeholder="Szukaj..." class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:placeholder-gray-400 text-sm col-span-2 sm:col-span-1" />
+                        <select v-model="filters.type" @change="applyFilters" class="rounded-lg border-gray-300 text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 text-sm">
                             <option value="">Wszystkie typy</option>
                             <option value="expense">Wydatki</option>
                             <option value="income">Przychody</option>
                         </select>
-                        <select v-model="filters.category_id" @change="applyFilters" class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 text-sm">
+                        <select v-model="filters.category_id" @change="applyFilters" class="rounded-lg border-gray-300 text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 text-sm">
                             <option value="">Kategoria</option>
                             <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.icon }} {{ cat.name }}</option>
                         </select>
-                        <select v-model="filters.payment_method" @change="applyFilters" class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 text-sm">
+                        <select v-model="filters.payment_method" @change="applyFilters" class="rounded-lg border-gray-300 text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 text-sm">
                             <option value="">Metoda</option>
                             <option value="cash">Gotówka</option>
                             <option value="card">Karta</option>
                         </select>
-                        <input v-model="filters.date_from" type="date" @change="applyFilters" class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 text-sm" />
-                        <input v-model="filters.date_to" type="date" @change="applyFilters" class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 text-sm" />
+                        <input v-model="filters.date_from" type="date" @change="applyFilters" class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:placeholder-gray-400 text-sm" />
+                        <input v-model="filters.date_to" type="date" @change="applyFilters" class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:placeholder-gray-400 text-sm" />
                     </div>
                     <div class="mt-2 text-right">
                         <button @click="resetFilters" class="text-xs sm:text-sm text-indigo-600 dark:text-indigo-400 hover:underline">Wyczyść filtry</button>

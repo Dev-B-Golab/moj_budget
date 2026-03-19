@@ -185,6 +185,33 @@ function formatDate(date) {
                     </div>
                 </div>
 
+                <!-- Recent Transactions -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 sm:p-5">
+                    <h3 class="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 sm:mb-4">Ostatnie transakcje</h3>
+                    <div v-if="recentTransactions.length > 0" class="divide-y divide-gray-200 dark:divide-gray-700">
+                        <div v-for="t in recentTransactions" :key="t.id" class="flex items-center justify-between py-3">
+                            <div class="flex items-center gap-3">
+                                <span class="text-xl">{{ t.category?.icon }}</span>
+                                <div>
+                                    <div class="text-sm font-medium text-gray-800 dark:text-gray-200">
+                                        {{ t.description || t.category?.name }}
+                                    </div>
+                                    <div class="text-xs text-gray-500">
+                                        {{ formatDate(t.date) }}
+                                        <span class="ml-2 px-1.5 py-0.5 rounded text-xs" :class="t.payment_method === 'card' ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300' : 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'">
+                                            {{ t.payment_method === 'card' ? 'Karta' : 'Gotówka' }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-sm font-semibold" :class="t.type === 'income' ? 'text-green-600' : 'text-red-600'">
+                                {{ t.type === 'income' ? '+' : '-' }}{{ formatMoney(t.amount) }}
+                            </div>
+                        </div>
+                    </div>
+                    <p v-else class="text-gray-400 text-center py-10">Brak transakcji</p>
+                </div>
+
                 <!-- Charts -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 sm:p-5">
@@ -200,50 +227,6 @@ function formatDate(date) {
                             <Bar :data="barData" :options="barOptions" />
                         </div>
                         <p v-else class="text-gray-400 text-center py-10">Brak danych</p>
-                    </div>
-                </div>
-
-                <!-- Quick Add + Recent Transactions -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 sm:p-5">
-                        <h3 class="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 sm:mb-4">Szybkie akcje</h3>
-                        <div class="space-y-2 sm:space-y-3">
-                            <Link :href="route('transactions.create')" class="block w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 sm:py-3 px-4 rounded-xl transition text-sm">
-                                + Dodaj transakcję
-                            </Link>
-                            <Link :href="route('transactions.index')" class="block w-full text-center bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium py-2.5 sm:py-3 px-4 rounded-xl transition text-sm">
-                                Wszystkie transakcje
-                            </Link>
-                            <Link :href="route('statistics.index')" class="block w-full text-center bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium py-2.5 sm:py-3 px-4 rounded-xl transition text-sm">
-                                Statystyki
-                            </Link>
-                        </div>
-                    </div>
-
-                    <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 sm:p-5">
-                        <h3 class="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 sm:mb-4">Ostatnie transakcje</h3>
-                        <div v-if="recentTransactions.length > 0" class="divide-y divide-gray-200 dark:divide-gray-700">
-                            <div v-for="t in recentTransactions" :key="t.id" class="flex items-center justify-between py-3">
-                                <div class="flex items-center gap-3">
-                                    <span class="text-xl">{{ t.category?.icon }}</span>
-                                    <div>
-                                        <div class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            {{ t.description || t.category?.name }}
-                                        </div>
-                                        <div class="text-xs text-gray-500">
-                                            {{ formatDate(t.date) }}
-                                            <span class="ml-2 px-1.5 py-0.5 rounded text-xs" :class="t.payment_method === 'card' ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300' : 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'">
-                                                {{ t.payment_method === 'card' ? 'Karta' : 'Gotówka' }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="text-sm font-semibold" :class="t.type === 'income' ? 'text-green-600' : 'text-red-600'">
-                                    {{ t.type === 'income' ? '+' : '-' }}{{ formatMoney(t.amount) }}
-                                </div>
-                            </div>
-                        </div>
-                        <p v-else class="text-gray-400 text-center py-10">Brak transakcji</p>
                     </div>
                 </div>
             </div>

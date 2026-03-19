@@ -14,13 +14,21 @@ const props = defineProps({
     paymentMethodStats: Array,
     yearTotal: Object,
     selectedYear: Number,
+    selectedMonth: Number,
     availableYears: Array,
+    dailyData: Array,
+    dailyTotals: Array,
 });
 
 const monthNames = ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'];
+const fullMonthNames = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
 
 function changeYear(year) {
-    router.get(route('statistics.index'), { year }, { preserveState: true, replace: true });
+    router.get(route('statistics.index'), { year, month: props.selectedMonth }, { preserveState: true, replace: true });
+}
+
+function changeMonth(month) {
+    router.get(route('statistics.index'), { year: props.selectedYear, month }, { preserveState: true, replace: true });
 }
 
 function formatMoney(amount) {
@@ -95,6 +103,28 @@ const paymentDoughnutData = computed(() => ({
         borderColor: '#fff',
     }],
 }));
+
+// Group daily data by day for the breakdown table
+const dailyBreakdown = computed(() => {
+    const days = {};
+    props.dailyTotals.forEach(d => {
+        days[d.day] = { day: d.day, income: Number(d.income), expenses: Number(d.expenses), categories: [] };
+    });
+    props.dailyData.forEach(d => {
+        if (!days[d.day]) {
+            days[d.day] = { day: d.day, income: 0, expenses: 0, categories: [] };
+        }
+        if (d.type === 'expense') {
+            days[d.day].categories.push({
+                name: d.category_name,
+                icon: d.category_icon,
+                color: d.category_color,
+                total: Number(d.total),
+            });
+        }
+    });
+    return Object.values(days).sort((a, b) => b.day - a.day);
+});
 </script>
 
 <template>
@@ -103,9 +133,14 @@ const paymentDoughnutData = computed(() => ({
         <template #header>
             <div class="flex items-center justify-between">
                 <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">Statystyki</h2>
-                <select @change="changeYear(Number($event.target.value))" :value="selectedYear" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 text-sm">
-                    <option v-for="year in availableYears" :key="year" :value="year">{{ year }}</option>
-                </select>
+                <div class="flex items-center gap-2">
+                    <select @change="changeMonth(Number($event.target.value))" :value="selectedMonth" class="rounded-md border-gray-300 text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 text-sm">
+                        <option v-for="(name, i) in fullMonthNames" :key="i" :value="i + 1">{{ name }}</option>
+                    </select>
+                    <select @change="changeYear(Number($event.target.value))" :value="selectedYear" class="rounded-md border-gray-300 text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 text-sm">
+                        <option v-for="year in availableYears" :key="year" :value="year">{{ year }}</option>
+                    </select>
+                </div>
             </div>
         </template>
 
@@ -135,6 +170,31 @@ const paymentDoughnutData = computed(() => ({
                     <div class="h-56 sm:h-80">
                         <Bar :data="barData" :options="barOptions" />
                     </div>
+                </div>
+
+                <!-- Daily breakdown -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 sm:p-5">
+                    <h3 class="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 sm:mb-4">
+                        Wydatki dzienne — {{ fullMonthNames[selectedMonth - 1] }} {{ selectedYear }}
+                    </h3>
+                    <div v-if="dailyBreakdown.length > 0" class="space-y-3">
+                        <div v-for="day in dailyBreakdown" :key="day.day" class="border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm font-semibold text-gray-800 dark:text-gray-200">{{ day.day }}.{{ String(selectedMonth).padStart(2, '0') }}.{{ selectedYear }}</span>
+                                <div class="flex items-center gap-3 text-sm">
+                                    <span v-if="day.income > 0" class="text-green-600 font-medium">+{{ formatMoney(day.income) }}</span>
+                                    <span v-if="day.expenses > 0" class="text-red-600 font-medium">-{{ formatMoney(day.expenses) }}</span>
+                                </div>
+                            </div>
+                            <div v-if="day.categories.length > 0" class="flex flex-wrap gap-2">
+                                <span v-for="cat in day.categories" :key="cat.name" class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                    <span class="w-2 h-2 rounded-full shrink-0" :style="{ backgroundColor: cat.color }"></span>
+                                    {{ cat.icon }} {{ cat.name }}: {{ formatMoney(cat.total) }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <p v-else class="text-gray-400 text-center py-10">Brak danych za ten miesiąc</p>
                 </div>
 
                 <!-- Category charts -->

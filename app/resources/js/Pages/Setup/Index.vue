@@ -172,7 +172,7 @@ const progress = computed(() => (step.value / totalSteps) * 100);
                             <div>
                                 <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Dzień miesiąca</label>
                                 <select v-model.number="newItem.day_of_month"
-                                    class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 text-sm">
+                                    class="w-full rounded-md border-gray-300 text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 text-sm">
                                     <option v-for="d in 28" :key="d" :value="d">{{ d }}.</option>
                                 </select>
                             </div>
