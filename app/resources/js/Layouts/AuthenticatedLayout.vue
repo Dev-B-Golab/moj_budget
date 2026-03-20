@@ -43,6 +43,7 @@ const navPages = [
     { pattern: 'categories.*', route: 'categories.index' },
     { pattern: 'recurring.*', route: 'recurring.index' },
     { pattern: 'transfer.*', route: 'transfer.create' },
+    { pattern: 'budgets.*', route: 'budgets.index' },
     { pattern: 'statistics.*', route: 'statistics.index' },
 ];
 
@@ -135,6 +136,9 @@ function applyTheme() {
                                 <NavLink :href="route('transfer.create')" :active="route().current('transfer.*')">
                                     Transfer
                                 </NavLink>
+                                <NavLink :href="route('budgets.index')" :active="route().current('budgets.*')">
+                                    Budżety
+                                </NavLink>
                                 <NavLink :href="route('statistics.index')" :active="route().current('statistics.*')">
                                     Statystyki
                                 </NavLink>
@@ -226,6 +230,7 @@ function applyTheme() {
                                 <ResponsiveNavLink :href="route('categories.index')" :active="route().current('categories.*')" @click="showingNavigationDropdown = false">Kategorie</ResponsiveNavLink>
                                 <ResponsiveNavLink :href="route('recurring.index')" :active="route().current('recurring.*')" @click="showingNavigationDropdown = false">Cykliczne</ResponsiveNavLink>
                                 <ResponsiveNavLink :href="route('transfer.create')" :active="route().current('transfer.*')" @click="showingNavigationDropdown = false">Transfer</ResponsiveNavLink>
+                                <ResponsiveNavLink :href="route('budgets.index')" :active="route().current('budgets.*')" @click="showingNavigationDropdown = false">Budżety</ResponsiveNavLink>
                                 <ResponsiveNavLink :href="route('statistics.index')" :active="route().current('statistics.*')" @click="showingNavigationDropdown = false">Statystyki</ResponsiveNavLink>
                             </div>
 

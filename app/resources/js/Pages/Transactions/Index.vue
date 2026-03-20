@@ -7,9 +7,19 @@ const props = defineProps({
     transactions: Object,
     categories: Array,
     filters: Object,
+    accountCreatedAt: String,
 });
 
-const filters = ref({ ...props.filters });
+const today = new Date().toISOString().split('T')[0];
+
+const filters = ref({
+    search: props.filters.search || '',
+    type: props.filters.type || '',
+    category_id: props.filters.category_id || '',
+    payment_method: props.filters.payment_method || '',
+    date_from: props.filters.date_from || props.accountCreatedAt || '',
+    date_to: props.filters.date_to || today,
+});
 
 function applyFilters() {
     router.get(route('transactions.index'), filters.value, {

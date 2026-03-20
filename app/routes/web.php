@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
@@ -99,6 +100,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/recurring/create', [RecurringTransactionController::class, 'create'])->name('recurring.create');
     Route::get('/recurring/{recurring}/edit', [RecurringTransactionController::class, 'edit'])->name('recurring.edit');
     Route::get('/transfer', [TransferController::class, 'create'])->name('transfer.create');
+    Route::get('/budgets', [BudgetController::class, 'index'])->name('budgets.index');
 
     // Write operations (demo restricted)
     Route::middleware('demo.restrict')->group(function () {
@@ -113,6 +115,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/recurring/{recurring}', [RecurringTransactionController::class, 'destroy'])->name('recurring.destroy');
         Route::patch('/recurring/{recurring}/toggle', [RecurringTransactionController::class, 'toggle'])->name('recurring.toggle');
         Route::post('/transfer', [TransferController::class, 'store'])->name('transfer.store');
+        Route::post('/budgets', [BudgetController::class, 'store'])->name('budgets.store');
+        Route::put('/budgets/{budget}', [BudgetController::class, 'update'])->name('budgets.update');
+        Route::delete('/budgets/{budget}', [BudgetController::class, 'destroy'])->name('budgets.destroy');
     });
     }); // end setup.completed
 });

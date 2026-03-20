@@ -55,6 +55,7 @@ class TransactionController extends Controller
             'transactions' => $transactions,
             'categories' => $categories,
             'filters' => $request->only(['type', 'category_id', 'payment_method', 'date_from', 'date_to', 'search']),
+            'accountCreatedAt' => $user->created_at->toDateString(),
         ]);
     }
 

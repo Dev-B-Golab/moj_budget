@@ -145,12 +145,6 @@ const features = [
 
                 <!-- 3D Wallet Scene -->
                 <div class="relative h-[280px] sm:h-[400px] lg:h-[500px] overflow-hidden">
-                    <!-- Glow background -->
-                    <div class="absolute inset-0 bg-gradient-to-br from-indigo-400/40 via-violet-400/30 to-purple-300/20 dark:from-indigo-600/20 dark:via-violet-600/10 dark:to-transparent rounded-3xl blur-2xl"></div>
-                    <!-- Floating particles -->
-                    <div class="absolute top-10 left-10 w-3 h-3 bg-yellow-400 rounded-full opacity-60 animate-bounce" style="animation-delay: 0s; animation-duration: 2.5s;"></div>
-                    <div class="absolute top-20 right-20 w-2 h-2 bg-indigo-400 rounded-full opacity-50 animate-bounce" style="animation-delay: 0.5s; animation-duration: 3s;"></div>
-                    <div class="absolute bottom-20 left-20 w-2 h-2 bg-violet-400 rounded-full opacity-40 animate-bounce" style="animation-delay: 1s; animation-duration: 2.8s;"></div>
                     <Suspense>
                         <WalletScene class="relative z-10" />
                         <template #fallback>
