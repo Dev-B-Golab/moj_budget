@@ -17,6 +17,7 @@ class ProcessRecurringTransactions extends Command
         $today = Carbon::today();
 
         $due = RecurringTransaction::where('is_active', true)
+            ->whereNotNull('next_run')
             ->where('next_run', '<=', $today)
             ->get();
 
@@ -29,35 +30,43 @@ class ProcessRecurringTransactions extends Command
                 continue;
             }
 
-            // Create the transaction
-            Transaction::create([
-                'user_id' => $recurring->user_id,
-                'category_id' => $recurring->category_id,
-                'type' => $recurring->type,
-                'amount' => $recurring->amount,
-                'payment_method' => $recurring->payment_method,
-                'description' => $recurring->description,
-                'date' => $today->toDateString(),
-            ]);
+            // Process all missed runs (catch-up)
+            $runDate = $recurring->next_run->copy();
 
-            // Calculate next run
-            $nextRun = $today->copy()->addMonthNoOverflow();
-            $day = min($recurring->day_of_month, $nextRun->daysInMonth);
-            $nextRun->day($day);
+            while ($runDate->lte($today)) {
+                // Stop if past end_date
+                if ($recurring->end_date && $runDate->gt($recurring->end_date)) {
+                    $recurring->update(['is_active' => false, 'next_run' => null]);
+                    break;
+                }
 
-            // If next_run is past end_date, deactivate
-            if ($recurring->end_date && $nextRun->gt($recurring->end_date)) {
-                $recurring->update([
-                    'is_active' => false,
-                    'next_run' => null,
+                // Create the transaction with the SCHEDULED date
+                Transaction::create([
+                    'user_id' => $recurring->user_id,
+                    'category_id' => $recurring->category_id,
+                    'type' => $recurring->type,
+                    'amount' => $recurring->amount,
+                    'payment_method' => $recurring->payment_method,
+                    'description' => $recurring->description,
+                    'date' => $runDate->toDateString(),
                 ]);
-            } else {
-                $recurring->update([
-                    'next_run' => $nextRun->toDateString(),
-                ]);
+
+                $count++;
+
+                // Calculate next run from current run date
+                $nextRun = $runDate->copy()->addMonthNoOverflow();
+                $day = min($recurring->day_of_month, $nextRun->daysInMonth);
+                $nextRun->day($day);
+
+                // If next_run is past end_date, deactivate
+                if ($recurring->end_date && $nextRun->gt($recurring->end_date)) {
+                    $recurring->update(['is_active' => false, 'next_run' => null]);
+                    break;
+                }
+
+                $recurring->update(['next_run' => $nextRun->toDateString()]);
+                $runDate = $nextRun->copy();
             }
-
-            $count++;
         }
 
         $this->info("Processed {$count} recurring transaction(s).");

@@ -105,7 +105,7 @@ class RecurringTransactionController extends Controller
         $now = Carbon::today();
         $dayOfMonth = $validated['day_of_month'];
         $nextRun = $now->copy()->day(min($dayOfMonth, $now->daysInMonth));
-        if ($nextRun->lte($now)) {
+        if ($nextRun->lt($now)) {
             $nextRun->addMonthNoOverflow()->day(min($dayOfMonth, $nextRun->daysInMonth));
         }
 

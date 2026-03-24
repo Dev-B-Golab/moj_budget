@@ -34,7 +34,7 @@ class TransferController extends Controller
             ->firstOrFail();
 
         $isCardToCash = $validated['direction'] === 'card_to_cash';
-        $desc = $validated['description'] ?: ($isCardToCash ? 'Wypłata z bankomatu' : 'Wpłata na konto');
+        $desc = ($validated['description'] ?? null) ?: ($isCardToCash ? 'Wypłata z bankomatu' : 'Wpłata na konto');
 
         DB::transaction(function () use ($request, $validated, $transferExpense, $transferIncome, $isCardToCash, $desc) {
             $request->user()->transactions()->create([
