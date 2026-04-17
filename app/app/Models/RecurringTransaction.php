@@ -28,9 +28,9 @@ class RecurringTransaction extends Model
     {
         return [
             'amount' => 'decimal:2',
-            'start_date' => 'date',
-            'end_date' => 'date',
-            'next_run' => 'date',
+            'start_date' => 'date:Y-m-d',
+            'end_date' => 'date:Y-m-d',
+            'next_run' => 'date:Y-m-d',
             'is_active' => 'boolean',
             'day_of_month' => 'integer',
         ];

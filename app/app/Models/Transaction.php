@@ -24,7 +24,7 @@ class Transaction extends Model
     {
         return [
             'amount' => 'decimal:2',
-            'date' => 'date',
+            'date' => 'date:Y-m-d',
         ];
     }
 

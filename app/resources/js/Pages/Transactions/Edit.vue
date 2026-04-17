@@ -14,7 +14,7 @@ const form = useForm({
     category_id: props.transaction.category_id,
     payment_method: props.transaction.payment_method,
     description: props.transaction.description || '',
-    date: props.transaction.date.split('T')[0],
+    date: props.transaction.date?.split('T')[0] || props.transaction.date,
 });
 
 const filteredCategories = computed(() => {

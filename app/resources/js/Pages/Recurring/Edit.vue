@@ -15,8 +15,8 @@ const form = useForm({
     payment_method: props.recurring.payment_method,
     description: props.recurring.description || '',
     day_of_month: props.recurring.day_of_month,
-    start_date: props.recurring.start_date?.split('T')[0] || '',
-    end_date: props.recurring.end_date?.split('T')[0] || '',
+    start_date: props.recurring.start_date?.split('T')[0] || props.recurring.start_date || '',
+    end_date: props.recurring.end_date?.split('T')[0] || props.recurring.end_date || '',
     is_active: props.recurring.is_active,
 });
 

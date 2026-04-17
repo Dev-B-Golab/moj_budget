@@ -18,6 +18,7 @@ const props = defineProps({
     availableYears: Array,
     dailyData: Array,
     dailyTotals: Array,
+    forecast: Object,
 });
 
 const monthNames = ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'];
@@ -162,6 +163,67 @@ const dailyBreakdown = computed(() => {
                             {{ formatMoney(yearTotal.balance) }}
                         </div>
                     </div>
+                </div>
+
+                <!-- Forecast / Prognozy -->
+                <div v-if="forecast.hasData" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 sm:p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200">📊 Prognozy</h3>
+                        <span class="text-xs text-gray-400 dark:text-gray-500">na podstawie {{ forecast.summary.months_analyzed }} mies.</span>
+                    </div>
+
+                    <!-- Summary cards -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-5">
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
+                            <div class="text-xs text-gray-500 dark:text-gray-400">Śr. przychody/mies.</div>
+                            <div class="text-sm sm:text-base font-bold text-green-600 mt-1">{{ formatMoney(forecast.summary.avg_income) }}</div>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
+                            <div class="text-xs text-gray-500 dark:text-gray-400">Śr. wydatki/mies.</div>
+                            <div class="text-sm sm:text-base font-bold text-red-600 mt-1">{{ formatMoney(forecast.summary.avg_expenses) }}</div>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
+                            <div class="text-xs text-gray-500 dark:text-gray-400">Prognoza wydatków</div>
+                            <div class="text-sm sm:text-base font-bold mt-1" :class="forecast.summary.projected_expenses > forecast.summary.avg_expenses ? 'text-red-600' : 'text-orange-500'">
+                                {{ formatMoney(forecast.summary.projected_expenses) }}
+                            </div>
+                            <div class="text-xs mt-0.5" :class="forecast.summary.projected_expenses > forecast.summary.avg_expenses ? 'text-red-500' : 'text-green-500'">
+                                {{ forecast.summary.projected_expenses > forecast.summary.avg_expenses ? '↑' : '↓' }}
+                                {{ Math.abs(Math.round(((forecast.summary.projected_expenses - forecast.summary.avg_expenses) / forecast.summary.avg_expenses) * 100)) }}% vs średnia
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
+                            <div class="text-xs text-gray-500 dark:text-gray-400">Prognoza bilansu</div>
+                            <div class="text-sm sm:text-base font-bold mt-1" :class="forecast.summary.projected_balance >= 0 ? 'text-green-600' : 'text-red-600'">
+                                {{ formatMoney(forecast.summary.projected_balance) }}
+                            </div>
+                            <div class="text-xs text-gray-400 mt-0.5">dzień {{ forecast.summary.days_passed }}/{{ forecast.summary.days_in_month }}</div>
+                        </div>
+                    </div>
+
+                    <!-- Per-category forecast -->
+                    <h4 class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-3">Prognoza wg kategorii</h4>
+                    <div class="space-y-3">
+                        <div v-for="cat in forecast.categories" :key="cat.name" class="flex items-center gap-3">
+                            <div class="w-28 sm:w-36 shrink-0 flex items-center gap-1.5 min-w-0">
+                                <span class="text-base shrink-0">{{ cat.icon }}</span>
+                                <span class="text-xs sm:text-sm text-gray-700 dark:text-gray-300 truncate">{{ cat.name }}</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                                    <div class="h-2.5 rounded-full transition-all duration-500" :class="cat.percentage >= 100 ? 'bg-red-500' : cat.percentage >= 80 ? 'bg-orange-500' : cat.percentage >= 50 ? 'bg-yellow-500' : 'bg-green-500'" :style="{ width: Math.min(cat.percentage, 100) + '%' }"></div>
+                                </div>
+                            </div>
+                            <div class="w-20 sm:w-28 shrink-0 text-right">
+                                <div class="text-xs font-medium text-gray-700 dark:text-gray-300">{{ formatMoney(cat.current_spent) }}</div>
+                                <div class="text-xs text-gray-400">/ {{ formatMoney(cat.monthly_avg) }}</div>
+                            </div>
+                            <div class="w-10 shrink-0 text-right">
+                                <span class="text-xs font-semibold" :class="cat.percentage >= 100 ? 'text-red-600' : cat.percentage >= 80 ? 'text-orange-600' : 'text-gray-500'">{{ cat.percentage }}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p v-if="forecast.categories.length === 0" class="text-gray-400 text-center py-4 text-sm">Brak danych o wydatkach</p>
                 </div>
 
                 <!-- Monthly chart -->
